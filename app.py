@@ -39,16 +39,20 @@ if "block_choice" not in st.session_state:
     st.session_state.block_choice = None
 if "plant_choice" not in st.session_state:
     st.session_state.plant_choice = None
+if "row_index" not in st.session_state:
+    st.session_state.row_index = None
+if "plant_name" not in st.session_state:
+    st.session_state.plant_name = None
 
 # --- Level 1: Show blocks ---
-st.header("Blocks")
-cols = st.columns(len(custom_blocks))
-for i, block in enumerate(custom_blocks):
-    if cols[i].button(block["label"], key=f"block_{block['id']}"):
-        st.session_state.block_choice = block["id"]
-        st.session_state.block_label = block["label"]
-        st.session_state.block_type_choice = block["type"]
-        st.session_state.plant_choice = None
+if not st.session_state.block_choice:
+    st.header("Blocks")
+    cols = st.columns(len(custom_blocks))
+    for i, block in enumerate(custom_blocks):
+        if cols[i].button(block["label"], key=f"block_{block['id']}"):
+            st.session_state.block_choice = block["id"]
+            st.session_state.block_label = block["label"]
+            st.session_state.block_type_choice = block["type"]
 
 # --- Plant arrangement rules ---
 def get_plants_per_row(block_id):
@@ -61,7 +65,7 @@ def get_plants_per_row(block_id):
     else:
         return 0
 
-# --- Level 2: Show plants or selected plant form ---
+# --- Level 2: Section view (grid of plants) ---
 if st.session_state.block_choice and not st.session_state.plant_choice:
     st.subheader(f"Plants in {st.session_state.block_label}")
     rows = 22
@@ -79,7 +83,7 @@ if st.session_state.block_choice and not st.session_state.plant_choice:
                 st.session_state.row_index = r
                 st.session_state.plant_name = plant_name
 
-# --- Level 3: Show only selected plant form ---
+# --- Level 3: Plant view (only selected plant details) ---
 if st.session_state.plant_choice:
     st.subheader(f"Details for {st.session_state.plant_choice}")
     plant_data = df[df["plant_id"] == st.session_state.plant_choice]
@@ -134,7 +138,7 @@ if st.session_state.plant_choice:
             df.to_csv(DATA_FILE, index=False)
             st.success(f"Plant {st.session_state.plant_choice} updated! Harvest expected on {harvest_date}")
 
-    if st.button("🔙 Back to Block View"):
+    if st.button("🔙 Back to Section View"):
         st.session_state.plant_choice = None
 
 # --- Reminder system ---
