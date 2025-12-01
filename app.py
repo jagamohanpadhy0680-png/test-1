@@ -76,64 +76,60 @@ if st.session_state.block_choice:
             plant_id = f"{st.session_state.block_label}-Row{r+1}-{plant_name}"
             if row_cols[p].button(f"🌱 {plant_name}", key=plant_id):
                 st.session_state.plant_choice = plant_id
+                # --- Modal pop-up for plant details ---
+                with st.modal(f"Details for {plant_id}"):
+                    plant_data = df[df["plant_id"] == plant_id]
+                    with st.form(f"form_{plant_id}"):
+                        planting_date = st.date_input(
+                            "Planting Date",
+                            value=pd.to_datetime(plant_data["planting_date"].iloc[0]).date()
+                            if not plant_data.empty and pd.notnull(plant_data["planting_date"].iloc[0])
+                            else datetime.date.today()
+                        )
+                        fertilizer_date = st.date_input(
+                            "Next Fertilizer Date",
+                            value=pd.to_datetime(plant_data["fertilizer_date"].iloc[0]).date()
+                            if not plant_data.empty and pd.notnull(plant_data["fertilizer_date"].iloc[0])
+                            else datetime.date.today()
+                        )
+                        irrigation_cycle = st.text_input(
+                            "Irrigation Cycle",
+                            value=plant_data["irrigation_cycle"].iloc[0] if not plant_data.empty else ""
+                        )
+                        notes = st.text_area(
+                            "Notes",
+                            value=plant_data["notes"].iloc[0] if not plant_data.empty else ""
+                        )
+                        flowering_date = st.date_input(
+                            "Flowering Date",
+                            value=pd.to_datetime(plant_data["flowering_date"].iloc[0]).date()
+                            if not plant_data.empty and pd.notnull(plant_data["flowering_date"].iloc[0])
+                            else datetime.date.today()
+                        )
 
-# --- Level 3: Plant details form ---
-if st.session_state.plant_choice:
-    plant_choice = st.session_state.plant_choice
-    st.subheader(f"Details for {plant_choice}")
-    plant_data = df[df["plant_id"] == plant_choice]
+                        # Auto-calculate harvest date
+                        harvest_date = flowering_date + datetime.timedelta(days=90)
+                        st.info(f"Expected Harvest Date: {harvest_date}")
 
-    with st.form("plant_form"):
-        planting_date = st.date_input(
-            "Planting Date",
-            value=pd.to_datetime(plant_data["planting_date"].iloc[0]).date()
-            if not plant_data.empty and pd.notnull(plant_data["planting_date"].iloc[0])
-            else datetime.date.today()
-        )
-        fertilizer_date = st.date_input(
-            "Next Fertilizer Date",
-            value=pd.to_datetime(plant_data["fertilizer_date"].iloc[0]).date()
-            if not plant_data.empty and pd.notnull(plant_data["fertilizer_date"].iloc[0])
-            else datetime.date.today()
-        )
-        irrigation_cycle = st.text_input(
-            "Irrigation Cycle",
-            value=plant_data["irrigation_cycle"].iloc[0] if not plant_data.empty else ""
-        )
-        notes = st.text_area(
-            "Notes",
-            value=plant_data["notes"].iloc[0] if not plant_data.empty else ""
-        )
-        flowering_date = st.date_input(
-            "Flowering Date",
-            value=pd.to_datetime(plant_data["flowering_date"].iloc[0]).date()
-            if not plant_data.empty and pd.notnull(plant_data["flowering_date"].iloc[0])
-            else datetime.date.today()
-        )
-
-        # Auto-calculate harvest date
-        harvest_date = flowering_date + datetime.timedelta(days=90)
-        st.info(f"Expected Harvest Date: {harvest_date}")
-
-        submitted = st.form_submit_button("Save Plant")
-        if submitted:
-            new_entry = {
-                "plant_id": plant_choice,
-                "block_type": st.session_state.block_type_choice,
-                "block_id": st.session_state.block_choice,
-                "row": int(plant_choice.split("-")[1][3:]),  # Row number
-                "position": plant_choice.split("-")[2],      # A1, B2, etc.
-                "planting_date": planting_date,
-                "fertilizer_date": fertilizer_date,
-                "irrigation_cycle": irrigation_cycle,
-                "notes": notes,
-                "flowering_date": flowering_date,
-                "harvest_date": harvest_date
-            }
-            df = df[df["plant_id"] != plant_choice]
-            df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
-            df.to_csv(DATA_FILE, index=False)
-            st.success(f"Plant {plant_choice} updated! Harvest expected on {harvest_date}")
+                        submitted = st.form_submit_button("Save Plant")
+                        if submitted:
+                            new_entry = {
+                                "plant_id": plant_id,
+                                "block_type": st.session_state.block_type_choice,
+                                "block_id": st.session_state.block_choice,
+                                "row": r+1,
+                                "position": plant_name,
+                                "planting_date": planting_date,
+                                "fertilizer_date": fertilizer_date,
+                                "irrigation_cycle": irrigation_cycle,
+                                "notes": notes,
+                                "flowering_date": flowering_date,
+                                "harvest_date": harvest_date
+                            }
+                            df = df[df["plant_id"] != plant_id]
+                            df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
+                            df.to_csv(DATA_FILE, index=False)
+                            st.success(f"Plant {plant_id} updated! Harvest expected on {harvest_date}")
 
 # --- Reminder system ---
 today = datetime.date.today()
