@@ -48,7 +48,7 @@ for i, block in enumerate(custom_blocks):
         st.session_state.block_choice = block["id"]
         st.session_state.block_label = block["label"]
         st.session_state.block_type_choice = block["type"]
-        st.session_state.plant_choice = None  # reset plant when block changes
+        st.session_state.plant_choice = None
 
 # --- Plant arrangement rules ---
 def get_plants_per_row(block_id):
@@ -76,8 +76,9 @@ if st.session_state.block_choice:
             plant_id = f"{st.session_state.block_label}-Row{r+1}-{plant_name}"
             if row_cols[p].button(f"🌱 {plant_name}", key=plant_id):
                 st.session_state.plant_choice = plant_id
-                # --- Modal pop-up for plant details ---
-                with st.modal(f"Details for {plant_id}"):
+
+            if st.session_state.plant_choice == plant_id:
+                with row_cols[p].expander("Enter Plant Details"):
                     plant_data = df[df["plant_id"] == plant_id]
                     with st.form(f"form_{plant_id}"):
                         planting_date = st.date_input(
@@ -107,7 +108,6 @@ if st.session_state.block_choice:
                             else datetime.date.today()
                         )
 
-                        # Auto-calculate harvest date
                         harvest_date = flowering_date + datetime.timedelta(days=90)
                         st.info(f"Expected Harvest Date: {harvest_date}")
 
