@@ -66,6 +66,10 @@ if st.session_state.block_choice is None:
 
 # --- View 2: Plant grid (section view) ---
 elif st.session_state.plant_choice is None:
+    # Back button at top
+    if st.button("🔙 Back to Blocks"):
+        st.session_state.block_choice = None
+
     st.subheader(f"Plants in {st.session_state.block_label}")
     rows = 22
     plants_per_row = get_plants_per_row(st.session_state.block_choice)
@@ -82,12 +86,9 @@ elif st.session_state.plant_choice is None:
                 st.session_state.row_index = r
                 st.session_state.plant_name = plant_name
 
-    if st.button("🔙 Back to Blocks"):
-        st.session_state.block_choice = None
-
 # --- View 3: Plant details (only flowering + harvest) ---
 else:
-    # Back button at the top
+    # Back button at top
     if st.button("🔙 Back to Section View"):
         st.session_state.plant_choice = None
 
