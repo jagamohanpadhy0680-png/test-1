@@ -43,6 +43,24 @@ if "row_index" not in st.session_state:
 if "plant_name" not in st.session_state:
     st.session_state.plant_name = None
 
+# --- Callbacks ---
+def select_block(block_id, block_label, block_type):
+    st.session_state.block_choice = block_id
+    st.session_state.block_label = block_label
+    st.session_state.block_type_choice = block_type
+
+def select_plant(plant_id, row_index, plant_name):
+    st.session_state.plant_choice = plant_id
+    st.session_state.row_index = row_index
+    st.session_state.plant_name = plant_name
+
+def back_to_blocks():
+    st.session_state.block_choice = None
+    st.session_state.plant_choice = None
+
+def back_to_section():
+    st.session_state.plant_choice = None
+
 # --- Plant arrangement rules ---
 def get_plants_per_row(block_id):
     if block_id in [1, 3, 4, 6, 7, 9, 10, 12]:
@@ -59,17 +77,16 @@ if st.session_state.block_choice is None:
     st.header("Blocks")
     cols = st.columns(len(custom_blocks))
     for i, block in enumerate(custom_blocks):
-        if cols[i].button(block["label"], key=f"block_{block['id']}"):
-            st.session_state.block_choice = block["id"]
-            st.session_state.block_label = block["label"]
-            st.session_state.block_type_choice = block["type"]
+        cols[i].button(
+            block["label"],
+            key=f"block_{block['id']}",
+            on_click=select_block,
+            args=(block["id"], block["label"], block["type"])
+        )
 
 # --- View 2: Section view (plant grid) ---
 elif st.session_state.plant_choice is None:
-    # Back button FIRST — exit before rendering
-    if st.button("🔙 Back to Blocks"):
-        st.session_state.block_choice = None
-        st.stop()
+    st.button("🔙 Back to Blocks", on_click=back_to_blocks)
 
     st.subheader(f"Plants in {st.session_state.block_label}")
     rows = 22
@@ -82,17 +99,16 @@ elif st.session_state.plant_choice is None:
         for p in range(plants_per_row):
             plant_name = f"{row_letter}{p+1}"
             plant_id = f"{st.session_state.block_label}-Row{r+1}-{plant_name}"
-            if row_cols[p].button(f"🌱 {plant_name}", key=plant_id):
-                st.session_state.plant_choice = plant_id
-                st.session_state.row_index = r
-                st.session_state.plant_name = plant_name
+            row_cols[p].button(
+                f"🌱 {plant_name}",
+                key=plant_id,
+                on_click=select_plant,
+                args=(plant_id, r, plant_name)
+            )
 
 # --- View 3: Plant details (flowering + harvest only) ---
 else:
-    # Back button FIRST — exit before rendering
-    if st.button("🔙 Back to Section View"):
-        st.session_state.plant_choice = None
-        st.stop()
+    st.button("🔙 Back to Section View", on_click=back_to_section)
 
     st.subheader(f"Details for {st.session_state.plant_choice}")
     plant_data = df[df["plant_id"] == st.session_state.plant_choice]
