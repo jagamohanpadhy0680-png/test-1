@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import datetime
+import string
 
 DATA_FILE = "data.csv"
 
@@ -65,12 +66,17 @@ if block_choice:
     plants_per_row = get_plants_per_row(block_choice)
     plant_choice = None
 
-    for r in range(1, rows + 1):
+    # Alphabet letters for rows (A, B, C, …)
+    row_letters = list(string.ascii_uppercase)[:rows]
+
+    for r in range(rows):
         row_cols = st.columns(plants_per_row)
+        row_letter = row_letters[r]  # A, B, C, ...
         for p in range(plants_per_row):
-            plant_name = f"A{p+1}"  # Alphabetical naming
-            plant_id = f"{block_label}-Row{r}-{plant_name}"
-            if row_cols[p].button(plant_name, key=plant_id):
+            plant_name = f"{row_letter}{p+1}"  # A1..A8, B1..B8, etc.
+            plant_id = f"{block_label}-Row{r+1}-{plant_name}"
+            # Plant icon + name
+            if row_cols[p].button(f"🌱 {plant_name}", key=plant_id):
                 plant_choice = plant_id
 
     # --- Level 3: Plant details form ---
@@ -106,7 +112,7 @@ if block_choice:
                     "plant_id": plant_choice,
                     "block_type": block_type_choice,
                     "block_id": block_choice,
-                    "row": r,
+                    "row": r+1,
                     "position": plant_name,
                     "planting_date": planting_date,
                     "fertilizer_date": fertilizer_date,
