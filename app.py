@@ -11,7 +11,6 @@ try:
 except FileNotFoundError:
     df = pd.DataFrame(columns=[
         "plant_id", "block_type", "block_id", "row", "position",
-        "planting_date", "fertilizer_date", "irrigation_cycle", "notes",
         "flowering_date", "harvest_date"
     ])
     df.to_csv(DATA_FILE, index=False)
@@ -86,32 +85,16 @@ elif st.session_state.plant_choice is None:
     if st.button("🔙 Back to Blocks"):
         st.session_state.block_choice = None
 
-# --- View 3: Plant details (single plant view) ---
+# --- View 3: Plant details (only flowering + harvest) ---
 else:
+    # Back button at the top
+    if st.button("🔙 Back to Section View"):
+        st.session_state.plant_choice = None
+
     st.subheader(f"Details for {st.session_state.plant_choice}")
     plant_data = df[df["plant_id"] == st.session_state.plant_choice]
 
     with st.form("plant_form"):
-        planting_date = st.date_input(
-            "Planting Date",
-            value=pd.to_datetime(plant_data["planting_date"].iloc[0]).date()
-            if not plant_data.empty and pd.notnull(plant_data["planting_date"].iloc[0])
-            else datetime.date.today()
-        )
-        fertilizer_date = st.date_input(
-            "Next Fertilizer Date",
-            value=pd.to_datetime(plant_data["fertilizer_date"].iloc[0]).date()
-            if not plant_data.empty and pd.notnull(plant_data["fertilizer_date"].iloc[0])
-            else datetime.date.today()
-        )
-        irrigation_cycle = st.text_input(
-            "Irrigation Cycle",
-            value=plant_data["irrigation_cycle"].iloc[0] if not plant_data.empty else ""
-        )
-        notes = st.text_area(
-            "Notes",
-            value=plant_data["notes"].iloc[0] if not plant_data.empty else ""
-        )
         flowering_date = st.date_input(
             "Flowering Date",
             value=pd.to_datetime(plant_data["flowering_date"].iloc[0]).date()
@@ -129,10 +112,6 @@ else:
                 "block_id": st.session_state.block_choice,
                 "row": st.session_state.row_index + 1,
                 "position": st.session_state.plant_name,
-                "planting_date": planting_date,
-                "fertilizer_date": fertilizer_date,
-                "irrigation_cycle": irrigation_cycle,
-                "notes": notes,
                 "flowering_date": flowering_date,
                 "harvest_date": harvest_date
             }
@@ -141,17 +120,8 @@ else:
             df.to_csv(DATA_FILE, index=False)
             st.success(f"Plant {st.session_state.plant_choice} updated! Harvest expected on {harvest_date}")
 
-    if st.button("🔙 Back to Section View"):
-        st.session_state.plant_choice = None
-
 # --- Reminder system ---
 today = datetime.date.today()
-if "fertilizer_date" in df.columns:
-    df["fertilizer_date_str"] = pd.to_datetime(df["fertilizer_date"], errors="coerce").dt.date.astype(str)
-    due_fertilizer = df[df["fertilizer_date_str"] == str(today)]
-    if not due_fertilizer.empty:
-        st.warning(f"Reminder: {len(due_fertilizer)} plants need fertilizer today!")
-
 if "harvest_date" in df.columns:
     df["harvest_date_str"] = pd.to_datetime(df["harvest_date"], errors="coerce").dt.date.astype(str)
     due_harvest = df[df["harvest_date_str"] == str(today)]
