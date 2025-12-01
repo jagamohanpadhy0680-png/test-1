@@ -16,35 +16,42 @@ except FileNotFoundError:
 
 st.title("🍌 Banana Field Management Tool")
 
-# --- Define mapping for roads ---
-road_map = {2: "R1", 5: "R2", 8: "R3", 11: "R4"}
+# --- Define custom block layout ---
+custom_blocks = [
+    {"label": "S1", "id": 1, "type": "section"},
+    {"label": "R1", "id": 2, "type": "road"},
+    {"label": "S2", "id": 3, "type": "section"},
+    {"label": "S3", "id": 4, "type": "section"},
+    {"label": "R2", "id": 5, "type": "road"},
+    {"label": "S4", "id": 6, "type": "section"},
+    {"label": "S5", "id": 7, "type": "section"},
+    {"label": "R3", "id": 8, "type": "road"},
+    {"label": "S6", "id": 9, "type": "section"},
+    {"label": "S7", "id": 10, "type": "section"},
+    {"label": "R4", "id": 11, "type": "road"},
+    {"label": "S8", "id": 12, "type": "section"},
+]
 
-# --- Level 1: Show all blocks in a single row ---
-st.header("Blocks (Sections + Roads)")
-cols = st.columns(12)
+# --- Level 1: Show blocks in custom order ---
+st.header("Blocks")
+cols = st.columns(len(custom_blocks))
 block_choice = None
 block_label = None
+block_type_choice = None
 
-for i in range(12):
-    if i+1 in road_map:
-        label = road_map[i+1]   # R1, R2, R3, R4
-        block_type = "road"
-    else:
-        label = f"S{i+1}"       # S1, S3, S4, etc.
-        block_type = "section"
-
-    if cols[i].button(label, key=f"block_{i+1}"):
-        block_choice = i+1
-        block_label = label
-        block_type_choice = block_type
+for i, block in enumerate(custom_blocks):
+    if cols[i].button(block["label"], key=f"block_{block['id']}"):
+        block_choice = block["id"]
+        block_label = block["label"]
+        block_type_choice = block["type"]
 
 # --- Define plant arrangement rules ---
-def get_plants_per_row(block_num):
-    if block_num in [1, 3, 4, 6, 7, 9, 10, 12]:  # main sections
+def get_plants_per_row(block_id):
+    if block_id in [1, 3, 4, 6, 7, 9, 10, 12]:  # sections
         return 8
-    elif block_num in [2, 5, 11]:  # roads R1, R2, R4
+    elif block_id in [2, 5, 11]:  # roads R1, R2, R4
         return 3
-    elif block_num == 8:  # road R3
+    elif block_id == 8:  # road R3
         return 2
     else:
         return 0
@@ -105,7 +112,6 @@ if block_choice:
                     "irrigation_cycle": irrigation_cycle,
                     "notes": notes
                 }
-                # Remove old record if exists
                 df = df[df["plant_id"] != plant_choice]
                 df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
                 df.to_csv(DATA_FILE, index=False)
