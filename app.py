@@ -66,29 +66,31 @@ if st.session_state.block_choice is None:
 
 # --- View 2: Plant grid (section view) ---
 elif st.session_state.plant_choice is None:
-    # Back button at top
     if st.button("🔙 Back to Blocks"):
         st.session_state.block_choice = None
 
     st.subheader(f"Plants in {st.session_state.block_label}")
     rows = 22
     plants_per_row = get_plants_per_row(st.session_state.block_choice)
-    row_letters = list(string.ascii_uppercase)[:rows]
 
-    for r in range(rows):
-        row_cols = st.columns(plants_per_row)
-        row_letter = row_letters[r]
-        for p in range(plants_per_row):
-            plant_name = f"{row_letter}{p+1}"
-            plant_id = f"{st.session_state.block_label}-Row{r+1}-{plant_name}"
-            if row_cols[p].button(f"🌱 {plant_name}", key=plant_id):
-                st.session_state.plant_choice = plant_id
-                st.session_state.row_index = r
-                st.session_state.plant_name = plant_name
+    if isinstance(plants_per_row, int) and plants_per_row > 0:
+        row_letters = list(string.ascii_uppercase)[:rows]
+        for r in range(rows):
+            row_cols = st.columns(plants_per_row)
+            row_letter = row_letters[r]
+            for p in range(plants_per_row):
+                plant_name = f"{row_letter}{p+1}"
+                plant_id = f"{st.session_state.block_label}-Row{r+1}-{plant_name}"
+                if row_cols[p].button(f"🌱 {plant_name}", key=plant_id):
+                    st.session_state.plant_choice = plant_id
+                    st.session_state.row_index = r
+                    st.session_state.plant_name = plant_name
+    else:
+        st.error("Invalid block layout. Please go back and select a valid block.")
+        st.stop()
 
 # --- View 3: Plant details (only flowering + harvest) ---
 else:
-    # Back button at top
     if st.button("🔙 Back to Section View"):
         st.session_state.plant_choice = None
 
