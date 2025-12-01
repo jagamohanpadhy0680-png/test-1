@@ -68,8 +68,9 @@ if block_choice:
     for r in range(1, rows + 1):
         row_cols = st.columns(plants_per_row)
         for p in range(plants_per_row):
-            plant_id = f"{block_label}-R{r}-P{p+1}"
-            if row_cols[p].button("🌱", key=plant_id):
+            plant_name = f"A{p+1}"  # Alphabetical naming
+            plant_id = f"{block_label}-Row{r}-{plant_name}"
+            if row_cols[p].button(plant_name, key=plant_id):
                 plant_choice = plant_id
 
     # --- Level 3: Plant details form ---
@@ -105,8 +106,8 @@ if block_choice:
                     "plant_id": plant_choice,
                     "block_type": block_type_choice,
                     "block_id": block_choice,
-                    "row": int(plant_choice.split("-")[1][1:]),
-                    "position": int(plant_choice.split("-")[2][1:]),
+                    "row": r,
+                    "position": plant_name,
                     "planting_date": planting_date,
                     "fertilizer_date": fertilizer_date,
                     "irrigation_cycle": irrigation_cycle,
