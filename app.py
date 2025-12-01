@@ -87,15 +87,15 @@ if block_choice:
         with st.form("plant_form"):
             planting_date = st.date_input(
                 "Planting Date",
-                value=pd.to_datetime(
-                    plant_data["planting_date"].iloc[0]
-                ).date() if not plant_data.empty and pd.notnull(plant_data["planting_date"].iloc[0]) else datetime.date.today()
+                value=pd.to_datetime(plant_data["planting_date"].iloc[0]).date()
+                if not plant_data.empty and pd.notnull(plant_data["planting_date"].iloc[0])
+                else datetime.date.today()
             )
             fertilizer_date = st.date_input(
                 "Next Fertilizer Date",
-                value=pd.to_datetime(
-                    plant_data["fertilizer_date"].iloc[0]
-                ).date() if not plant_data.empty and pd.notnull(plant_data["fertilizer_date"].iloc[0]) else datetime.date.today()
+                value=pd.to_datetime(plant_data["fertilizer_date"].iloc[0]).date()
+                if not plant_data.empty and pd.notnull(plant_data["fertilizer_date"].iloc[0])
+                else datetime.date.today()
             )
             irrigation_cycle = st.text_input(
                 "Irrigation Cycle",
@@ -107,9 +107,9 @@ if block_choice:
             )
             flowering_date = st.date_input(
                 "Flowering Date",
-                value=pd.to_datetime(
-                    plant_data["flowering_date"].iloc[0]
-                ).date() if not plant_data.empty and pd.notnull(plant_data["flowering_date"].iloc[0]) else datetime.date.today()
+                value=pd.to_datetime(plant_data["flowering_date"].iloc[0]).date()
+                if not plant_data.empty and pd.notnull(plant_data["flowering_date"].iloc[0])
+                else datetime.date.today()
             )
 
             # Auto-calculate harvest date (flowering + 3 months)
